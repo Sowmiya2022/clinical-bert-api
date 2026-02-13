@@ -71,8 +71,8 @@ uvicorn app.main:app --reload --port 8080
 
 On first start the model (~440 MB) is downloaded and cached in `~/.cache/huggingface/`. Subsequent starts load from cache in seconds.
 
-- Swagger UI: http://localhost:8080/docs  
-- ReDoc: http://localhost:8080/redoc  
+- Swagger UI: http://localhost:8080/docs
+- ReDoc: http://localhost:8080/redoc
 - Health: http://localhost:8080/health
 
 ### 3. Run tests
@@ -332,6 +332,6 @@ HuggingFace model weights are downloaded during `docker build` (not at container
 
 ## Extra Credit Features
 
-- `/health` endpoint for liveness / readiness probes  
-- `POST /predict/batch` for batched inference (up to 64 sentences)  
+- `/health` endpoint for liveness / readiness probes
+- `POST /predict/batch` for batched inference (up to 64 sentences)
 - Auto-deploy on semver tag push (`v*.*.*` trigger in `cd.yml`)

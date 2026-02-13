@@ -6,10 +6,10 @@ Run with:
     pytest tests/ -v --cov=app --cov-report=term-missing
 """
 
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 
+import pytest
+from fastapi.testclient import TestClient
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -118,9 +118,7 @@ class TestPredict:
         assert 0.0 <= data["score"] <= 1.0
 
     def test_response_has_label_and_score(self, mock_predict_single):
-        resp = mock_predict_single.post(
-            "/predict", json={"sentence": "Patient has no fever."}
-        )
+        resp = mock_predict_single.post("/predict", json={"sentence": "Patient has no fever."})
         assert resp.status_code == 200
         data = resp.json()
         assert "label" in data

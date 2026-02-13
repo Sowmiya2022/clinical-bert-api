@@ -25,9 +25,9 @@ from fastapi.responses import JSONResponse
 
 from app.model import get_model_info, load_model, predict_batch, predict_single
 from app.schemas import (
+    BatchPredictItem,
     BatchPredictRequest,
     BatchPredictResponse,
-    BatchPredictItem,
     HealthResponse,
     PredictRequest,
     PredictResponse,
