@@ -1,0 +1,150 @@
+# ============================================================
+# cd.yml — Continuous Deployment
+#
+# Triggers:
+#   1. Push to main branch          → deploys to Cloud Run
+#   2. Push of a semver tag (v*.*.*)→ deploys with that version tag (extra credit)
+#
+# Required GitHub Secrets:
+#   GCP_PROJECT_ID        – your GCP project ID
+#   GCP_REGION            – e.g. us-central1
+#   GCP_SERVICE_ACCOUNT   – service account email with Artifact Registry + Cloud Run roles
+#   GCP_SA_KEY            – base64-encoded JSON key of the service account
+#   CLOUD_RUN_SERVICE     – Cloud Run service name (e.g. clinical-bert-api)
+#   AR_REPOSITORY         – Artifact Registry repo name (e.g. clinical-bert)
+# ============================================================
+
+name: CD
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]*"   # Extra credit: auto-deploy on semver tag
+
+env:
+  PYTHON_VERSION: "3.12"
+  IMAGE_NAME: clinical-bert-api
+
+jobs:
+  deploy:
+    name: Build → Push → Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write   # required for Workload Identity Federation (recommended over SA keys)
+
+    steps:
+      # ------------------------------------------------------------------ #
+      # 1. Checkout
+      # ------------------------------------------------------------------ #
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------ #
+      # 2. Determine image tag
+      #    • On a version tag push: use the tag (e.g. v1.2.3)
+      #    • On branch push: use the short commit SHA
+      # ------------------------------------------------------------------ #
+      - name: Determine image tag
+        id: tag
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="$(echo ${GITHUB_SHA} | cut -c1-8)"
+          fi
+          echo "image_tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Image tag: ${TAG}"
+
+      # ------------------------------------------------------------------ #
+      # 3. Authenticate to Google Cloud
+      # ------------------------------------------------------------------ #
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # ------------------------------------------------------------------ #
+      # 4. Configure Docker to push to Artifact Registry
+      # ------------------------------------------------------------------ #
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker \
+            ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
+
+      # ------------------------------------------------------------------ #
+      # 5. Build and push Docker image
+      # ------------------------------------------------------------------ #
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.image_tag }}
+            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ------------------------------------------------------------------ #
+      # 6. Deploy to Cloud Run
+      # ------------------------------------------------------------------ #
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ secrets.CLOUD_RUN_SERVICE }}
+          region: ${{ secrets.GCP_REGION }}
+          image: >-
+            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.image_tag }}
+          flags: |
+            --allow-unauthenticated
+            --memory=2Gi
+            --cpu=2
+            --min-instances=0
+            --max-instances=5
+            --concurrency=4
+            --timeout=60
+            --port=8080
+
+      # ------------------------------------------------------------------ #
+      # 7. Smoke test the deployed service
+      # ------------------------------------------------------------------ #
+      - name: Smoke test deployed service
+        run: |
+          SERVICE_URL="${{ steps.deploy.outputs.url }}"
+          echo "Service URL: ${SERVICE_URL}"
+
+          # Health check
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${SERVICE_URL}/health")
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Health check failed (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "Health check passed."
+
+          # Prediction smoke test
+          RESULT=$(curl -s -X POST "${SERVICE_URL}/predict" \
+            -H "Content-Type: application/json" \
+            -d '{"sentence": "The patient denies chest pain."}')
+          echo "Prediction result: ${RESULT}"
+
+          LABEL=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['label'])")
+          if [ "$LABEL" != "ABSENT" ]; then
+            echo "Unexpected label: $LABEL (expected ABSENT)"
+            exit 1
+          fi
+          echo "Smoke test passed!"
+
+      - name: Print deployed URL
+        run: echo "Deployed to ${{ steps.deploy.outputs.url }}"

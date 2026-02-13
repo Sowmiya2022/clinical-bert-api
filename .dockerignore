@@ -1,0 +1,46 @@
+
+# .dockerignore — keep the Docker build context lean
+
+# Version control
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Test artefacts
+tests/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# CI/CD
+.github/
+
+# Docs / scripts
+*.md
+deploy.sh
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local HF cache (model is downloaded at build time via Dockerfile RUN step)
+.hf_cache/

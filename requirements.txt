@@ -1,0 +1,27 @@
+# ============================================================
+# Clinical BERT Assertion API — Python dependencies
+# ============================================================
+
+# --- Web framework ---
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12          # required by FastAPI for form data
+
+# --- ML / NLP ---
+transformers==4.46.3
+torch==2.6.0                      # CPU wheel; swap for +cu121 for GPU
+huggingface-hub==0.26.2
+tokenizers==0.20.3
+safetensors==0.7.0
+
+# --- Validation ---
+pydantic==2.10.3
+
+# --- Dev / test ---
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+httpx==0.28.0                     # TestClient dependency for FastAPI
+black==24.10.0
+flake8==7.1.1
+isort==5.13.2
