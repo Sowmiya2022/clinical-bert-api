@@ -1,6 +1,5 @@
 ---
 title: Clinical Bert Api
-emoji: 🏥
 colorFrom: blue
 colorTo: green
 sdk: docker
@@ -192,7 +191,7 @@ Set the following secrets in your repository (**Settings → Secrets → Actions
 Then:
 - **Every PR / push to `main`**: `ci.yml` runs lint + tests + Docker build smoke test
 - **Merge to `main`**: `cd.yml` builds, pushes, and deploys automatically
-- **Push a semver tag** (e.g. `git tag v1.2.0 && git push --tags`): triggers a versioned production deploy (extra credit ✅)
+- **Push a semver tag** (e.g. `git tag v1.2.0 && git push --tags`): triggers a versioned production deploy (extra credit)
 
 ---
 
@@ -266,7 +265,7 @@ Expected output:
 
 ---
 
-### `POST /predict/batch` — Batch prediction (extra credit ✅)
+### `POST /predict/batch` — Batch prediction (extra credit)
 
 Classify up to **64 sentences** in a single request with one batched forward-pass.
 
