@@ -56,9 +56,9 @@ RUN adduser --disabled-password --gecos "" appuser \
  && chown -R appuser:appuser /app
 USER appuser
 
-# Cloud Run expects the server on the PORT env-var (default 8080)
-ENV PORT=8080
-EXPOSE 8080
+# Cloud Run expects the server on the PORT env-var (default 8080), since huggingface used port set to 7860
+ENV PORT=7860
+EXPOSE 7860
 
 # Health check — matches our /health endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
