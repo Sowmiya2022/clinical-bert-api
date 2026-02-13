@@ -45,7 +45,7 @@ def load_model() -> None:
         model=model,
         tokenizer=tokenizer,
         device=device,
-        top_k=None,          # return scores for ALL labels
+        top_k=None,  # return scores for ALL labels
         truncation=True,
         max_length=512,
     )
@@ -117,9 +117,7 @@ def predict_batch(sentences: list[str]) -> list[dict]:
             }
         )
 
-    logger.debug(
-        f"Batch prediction: {len(sentences)} sentences in {latency_ms:.1f}ms"
-    )
+    logger.debug(f"Batch prediction: {len(sentences)} sentences in {latency_ms:.1f}ms")
 
     return results
 
@@ -130,8 +128,6 @@ def get_model_info() -> dict:
         "model_name": MODEL_NAME,
         "loaded": _pipeline is not None,
         "load_time_ms": round(_load_time_ms, 1) if _load_time_ms else None,
-        "device": (
-            "GPU (CUDA)" if torch.cuda.is_available() else "CPU"
-        ),
+        "device": ("GPU (CUDA)" if torch.cuda.is_available() else "CPU"),
         "labels": ["PRESENT", "ABSENT", "CONDITIONAL"],
     }

@@ -77,9 +77,7 @@ class BatchPredictRequest(BaseModel):
         cleaned = []
         for i, s in enumerate(v):
             if not isinstance(s, str) or not s.strip():
-                raise ValueError(
-                    f"sentences[{i}] is empty or not a string."
-                )
+                raise ValueError(f"sentences[{i}] is empty or not a string.")
             cleaned.append(s.strip())
         return cleaned
 

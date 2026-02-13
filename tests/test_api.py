@@ -15,6 +15,7 @@ from unittest.mock import MagicMock, patch
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="module")
 def mock_predict_single():
     """
@@ -24,7 +25,10 @@ def mock_predict_single():
     label_map = {
         "The patient denies chest pain.": ("ABSENT", 0.9842),
         "He has a history of hypertension.": ("PRESENT", 0.9731),
-        "If the patient experiences dizziness, reduce the dosage.": ("CONDITIONAL", 0.9617),
+        "If the patient experiences dizziness, reduce the dosage.": (
+            "CONDITIONAL",
+            0.9617,
+        ),
         "No signs of pneumonia were observed.": ("ABSENT", 0.9754),
     }
 
@@ -33,9 +37,7 @@ def mock_predict_single():
         return {"label": label, "score": score}
 
     def _fake_batch(sentences: list) -> list:
-        return [
-            {"sentence": s, **_fake_predict(s)} for s in sentences
-        ]
+        return [{"sentence": s, **_fake_predict(s)} for s in sentences]
 
     with (
         patch("app.model.load_model"),
@@ -55,6 +57,7 @@ def mock_predict_single():
     ):
         # Import app AFTER patches are applied
         from app.main import app
+
         with TestClient(app) as client:
             yield client
 
@@ -62,6 +65,7 @@ def mock_predict_single():
 # ---------------------------------------------------------------------------
 # Health endpoint
 # ---------------------------------------------------------------------------
+
 
 class TestHealth:
     def test_health_returns_200(self, mock_predict_single):
@@ -79,6 +83,7 @@ class TestHealth:
 # ---------------------------------------------------------------------------
 # Root endpoint
 # ---------------------------------------------------------------------------
+
 
 class TestRoot:
     def test_root_returns_200(self, mock_predict_single):
@@ -148,9 +153,7 @@ class TestPredict:
         assert resp.status_code == 422
 
     def test_sentence_too_long_returns_422(self, mock_predict_single):
-        resp = mock_predict_single.post(
-            "/predict", json={"sentence": "word " * 600}
-        )
+        resp = mock_predict_single.post("/predict", json={"sentence": "word " * 600})
         assert resp.status_code == 422
 
     def test_non_string_sentence_returns_422(self, mock_predict_single):
@@ -166,12 +169,11 @@ class TestPredict:
 # Batch prediction
 # ---------------------------------------------------------------------------
 
+
 class TestBatchPredict:
     def test_batch_returns_correct_count(self, mock_predict_single):
         sentences = [s for s, _ in REQUIRED_CASES]
-        resp = mock_predict_single.post(
-            "/predict/batch", json={"sentences": sentences}
-        )
+        resp = mock_predict_single.post("/predict/batch", json={"sentences": sentences})
         assert resp.status_code == 200
         data = resp.json()
         assert data["count"] == len(sentences)
@@ -189,25 +191,19 @@ class TestBatchPredict:
 
     def test_batch_preserves_order(self, mock_predict_single):
         sentences = [s for s, _ in REQUIRED_CASES]
-        resp = mock_predict_single.post(
-            "/predict/batch", json={"sentences": sentences}
-        )
+        resp = mock_predict_single.post("/predict/batch", json={"sentences": sentences})
         returned_sentences = [r["sentence"] for r in resp.json()["results"]]
         assert returned_sentences == sentences
 
     def test_batch_required_labels(self, mock_predict_single):
         sentences = [s for s, _ in REQUIRED_CASES]
         expected_labels = [l for _, l in REQUIRED_CASES]
-        resp = mock_predict_single.post(
-            "/predict/batch", json={"sentences": sentences}
-        )
+        resp = mock_predict_single.post("/predict/batch", json={"sentences": sentences})
         returned_labels = [r["label"] for r in resp.json()["results"]]
         assert returned_labels == expected_labels
 
     def test_batch_empty_list_returns_422(self, mock_predict_single):
-        resp = mock_predict_single.post(
-            "/predict/batch", json={"sentences": []}
-        )
+        resp = mock_predict_single.post("/predict/batch", json={"sentences": []})
         assert resp.status_code == 422
 
     def test_batch_with_blank_sentence_returns_422(self, mock_predict_single):
