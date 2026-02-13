@@ -48,7 +48,7 @@ class PredictResponse(BaseModel):
         Field(
             ge=0.0,
             le=1.0,
-            description="Confidence score for the predicted label (0–1).",
+            description="Confidence score for the predicted label (0-1).",
             examples=[0.9842],
         ),
     ]
@@ -67,7 +67,7 @@ class BatchPredictRequest(BaseModel):
         Field(
             min_length=1,
             max_length=64,
-            description="List of clinical sentences (1–64 items).",
+            description="List of clinical sentences (1-64 items).",
         ),
     ]
 

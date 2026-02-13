@@ -72,7 +72,7 @@ def predict_single(sentence: str) -> dict:
     Returns:
         {"label": str, "score": float}
         where label is one of PRESENT | ABSENT | CONDITIONAL
-        and score is the confidence for that label (0–1).
+        and score is the confidence for that label (0-1).
     """
     pipe = get_pipeline()
 

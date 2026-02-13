@@ -332,6 +332,6 @@ HuggingFace model weights are downloaded during `docker build` (not at container
 
 ## Extra Credit Features
 
-- ✅ `/health` endpoint for liveness / readiness probes  
-- ✅ `POST /predict/batch` for batched inference (up to 64 sentences)  
-- ✅ Auto-deploy on semver tag push (`v*.*.*` trigger in `cd.yml`)
+- `/health` endpoint for liveness / readiness probes  
+- `POST /predict/batch` for batched inference (up to 64 sentences)  
+- Auto-deploy on semver tag push (`v*.*.*` trigger in `cd.yml`)

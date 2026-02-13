@@ -4,15 +4,15 @@ Clinical BERT Real-Time Inference API
 Classifies the assertion status of medical concepts in clinical text.
 
 Labels:
-  PRESENT     – concept is affirmed / observed
-  ABSENT      – concept is negated / denied
-  CONDITIONAL – concept depends on a condition or is hypothetical
+  PRESENT      - concept is affirmed / observed
+  ABSENT       - concept is negated / denied
+  CONDITIONAL  - concept depends on a condition or is hypothetical
 
 Endpoints:
-  GET  /health           – liveness/readiness probe
-  GET  /                 – API info
-  POST /predict          – single sentence classification
-  POST /predict/batch    – batch classification (up to 64 sentences)
+  GET  /health           - liveness/readiness probe
+  GET  /                 - API info
+  POST /predict          - single sentence classification
+  POST /predict/batch    - batch classification (up to 64 sentences)
 """
 
 import logging
@@ -161,9 +161,9 @@ async def predict(request: PredictRequest):
     Classify the assertion status of a clinical sentence.
 
     **Labels:**
-    - `PRESENT` – the medical concept is affirmed (e.g. *"The patient has fever."*)
-    - `ABSENT` – the concept is negated (e.g. *"No signs of pneumonia."*)
-    - `CONDITIONAL` – the concept is hypothetical (e.g. *"If dizziness occurs, reduce dose."*)
+    - `PRESENT` - the medical concept is affirmed (e.g. *"The patient has fever."*)
+    - `ABSENT` - the concept is negated (e.g. *"No signs of pneumonia."*)
+    - `CONDITIONAL` - the concept is hypothetical (e.g. *"If dizziness occurs, reduce dose."*)
 
     **Performance target:** < 500 ms for short clinical sentences on CPU.
     """
