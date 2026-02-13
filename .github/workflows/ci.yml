@@ -37,9 +37,8 @@ jobs:
 
       - name: black – format and fix
         run: black app/ tests/
-
-      - name: isort import order check
-        run: isort --check-only app/ tests/
+      - name: isort – import order check
+        run: isort --check-only --profile=black app/ tests/
 
       - name: flake8  style and error check
         run: |
