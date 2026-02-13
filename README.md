@@ -1,4 +1,15 @@
-# Clinical BERT Assertion API
+---
+title: Clinical Bert Api
+emoji: 🏥
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
+
+
+## Clinical BERT Assertion API
 
 A production-ready, real-time REST API that classifies the **assertion status** of medical concepts in clinical text using the [`bvanaken/clinical-assertion-negation-bert`](https://huggingface.co/bvanaken/clinical-assertion-negation-bert) HuggingFace model.
 
